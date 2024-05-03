@@ -20,12 +20,12 @@
     <!-- Text Drawings of Cats -->
     <div class="cat-drawing">
         <pre>
-   /\_/\  
-  ( o o ) 
-  \~(*)~/
-  /     \
- /  O O  \
-(_________)
+  /\_/\  
+ ( o o ) 
+\~(*)~/
+/     \
+/  O O  \
+(__________)
         </pre>
         <p>Meow! How can we assist you today?</p>
     </div>
@@ -33,7 +33,7 @@
     <div class="cat-drawing">
         <pre>
    /\_/\
-  ( o.o )
+   ( o.o )
    > ^ <
  </pre>
         <p>Need any help or information about cats? Feel free to ask!</p>
@@ -42,13 +42,37 @@
     <div class="cat-drawing">
         <pre>
    /\     /\
-  {  `---'  }
-  {  O   O  }
+   {  `---'  }
+   {  O   O  }
    \.     ./
-    \_) (_/
+   \_) (_/
 </pre>
         <p>We're here to answer all your feline-related inquiries!</p>
     </div>
+	
+	  <!-- Random Cat Form -->
+    <form id="cat-form" action="#" method="post">
+        <h2>A Simple Form For You To Tell Us About Your Cat</h2>
+        <label for="cat-name">Enter Cat's Name:</label>
+        <input type="text" id="cat-name" name="cat-name" required><br><br>
+        
+        <label for="cat-age">Enter Cat's Age:</label>
+        <input type="number" id="cat-age" name="cat-age" required><br><br>
+
+        <label for="cat-color">Select Cat's Color:</label>
+        <select id="cat-color" name="cat-color" required>
+            <option value="black">Black</option>
+            <option value="white">White</option>
+            <option value="gray">Gray</option>
+            <option value="brown">Brown</option>
+            <option value="orange">Orange</option>
+        </select><br><br>
+
+        <label for="cat-breed">Enter Cat's Breed:</label>
+        <input type="text" id="cat-breed" name="cat-breed" required><br><br>
+
+        <input type="submit" value="Submit">
+    </form>
 
 
 
