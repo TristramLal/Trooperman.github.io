@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cat HQ | Welcome to the Crazy Cat page</title>
+    <style>
+        /* Simple CSS for body text */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            text-align: left;
+            background-color: #fff; /* Initial background color */
+        }
+        h1 {
+            text-align: center;
+            margin-top: 40px; /* Two text lines distance from navigation */
+        }
+        nav {
+            background-color: #333;
+            overflow: hidden;
+            width: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        nav a {
+            display: inline-block;
+            color: white;
+            text-align: center;
+            padding: 14px 20px;
+            text-decoration: none;
+        }
+        nav a:hover {
+            background-color: #ddd;
+            color: black;
+        }
+        .riddle-list {
+            margin-top: 20px;
+        }
+        .riddle {
+            margin-bottom: 20px;
+        }
+        .answer {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Pane -->
+    <nav>
+        <a href="index.html" id="catHQLink">Cat HQ</a>
+        <a href="about.html" id="aboutLink">About</a>
+        <a href="contact.html" id="contactLink">Contact</a>
+    </nav>
+    
+    <h1>Welcome to the Crazy Cat page</h1>
+    <p>Hang around to find some stuff out!</p>
+
+    <!-- Cat Riddles -->
+    <div class="riddle-list">
+        <h2>Cat Riddles</h2>
+        <div class="riddle">
+            <p>1. What do you call a pile of kittens?</p>
+            <button onclick="showAnswer(1)">Show Answer</button>
+            <p class="answer" id="answer1">A meow-tain!</p>
+        </div>
+        <div class="riddle">
+            <p>2. What's a cat's favorite subject in school?</p>
+            <button onclick="showAnswer(2)">Show Answer</button>
+            <p class="answer" id="answer2">Hisstory!</p>
+        </div>
+        <div class="riddle">
+            <p>3. What do you get when you cross a chick with an alley cat?</p>
+            <button onclick="showAnswer(3)">Show Answer</button>
+            <p class="answer" id="answer3">A peeping tom!</p>
+        </div>
+        <div class="riddle">
+            <p>4. What is a cat's favorite color?</p>
+            <button onclick="showAnswer(4)">Show Answer</button>
+            <p class="answer" id="answer4">Purr-ple!</p>
+        </div>
+        <div class="riddle">
+            <p>5. What's a cat's favorite TV show?</p>
+            <button onclick="showAnswer(5)">Show Answer</button>
+            <p class="answer" id="answer5">The evening mews!</p>
+        </div>
+        <div class="riddle">
+            <p>6. Why did the cat sit on the computer?</p>
+            <button onclick="showAnswer(6)">Show Answer</button>
+            <p class="answer" id="answer6">Because it wanted to keep an eye on the mouse!</p>
+        </div>
+        <div class="riddle">
+            <p>7. What do you call a cat who likes to bowl?</p>
+            <button onclick="showAnswer(7)">Show Answer</button>
+            <p class="answer" id="answer7">An alley cat!</p>
+        </div>
+        <div class="riddle">
+            <p>8. What is a cat's favorite dessert?</p>
+            <button onclick="showAnswer(8)">Show Answer</button>
+            <p class="answer" id="answer8">Mice cream!</p>
+        </div>
+        <div class="riddle">
+            <p>9. How does a cat end a fight?</p>
+            <button onclick="showAnswer(9)">Show Answer</button>
+            <p class="answer" id="answer9">With a hiss-tory lesson!</p>
+        </div>
+        <div class="riddle">
+            <p>10. What kind of cat should you never play cards with?</p>
+            <button onclick="showAnswer(10)">Show Answer</button>
+            <p class="answer" id="answer10">A cheetah!</p>
+        </div>
+    </div>
+
+    <script>
+        function showAnswer(id) {
+            var answer = document.getElementById('answer' + id);
+            if (answer.style.display === 'none') {
+                answer.style.display = 'block';
+                changeBackgroundColor(); // Call function to change background color along the dark blue spectrum
+            } else {
+                answer.style.display = 'none';
+            }
+        }
+
+        function changeBackgroundColor() {
+            var body = document.querySelector('body');
+            var colors = ['#00008B', '#0000CD', '#0000FF']; // Dark blue spectrum colors
+            var bgColor = colors[Math.floor(Math.random() * colors.length)];
+            body.style.backgroundColor = bgColor;
+            localStorage.setItem('bgColor', bgColor); // Store the background color in localStorage
+        }
+
+        // Check for stored background color and set it on page load
+        window.addEventListener('load', function() {
+            var storedBgColor = localStorage.getItem('bgColor');
+            if (storedBgColor) {
+                var body = document.querySelector('body');
+                body.style.backgroundColor = storedBgColor;
+            }
+        });
+    </script>
+</body>
+</html>
