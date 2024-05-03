@@ -11,7 +11,7 @@
             margin: 0;
             padding: 20px;
             text-align: left;
-            background-color: #fff; /* Initial background color */
+            background-color: #006BCE; /* Default background color */
         }
         h1 {
             text-align: center;
@@ -50,9 +50,9 @@
 <body>
     <!-- Navigation Pane -->
     <nav>
-        <a href="index.html" id="catHQLink">Cat HQ</a>
-        <a href="about.html" id="aboutLink">About</a>
-        <a href="contact.html" id="contactLink">Contact</a>
+        <a href="index.html">Cat HQ</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
     </nav>
     
     <h1>Welcome to the Crazy Cat page</h1>
@@ -118,7 +118,7 @@
             var answer = document.getElementById('answer' + id);
             if (answer.style.display === 'none') {
                 answer.style.display = 'block';
-                changeBackgroundColor(); // Call function to change background color along the dark blue spectrum
+                changeBackgroundColor(); // Call function to change background color along the blue spectrum
             } else {
                 answer.style.display = 'none';
             }
@@ -126,20 +126,10 @@
 
         function changeBackgroundColor() {
             var body = document.querySelector('body');
-            var colors = ['#00008B', '#0000CD', '#0000FF']; // Dark blue spectrum colors
+            var colors = ['#006BCE', '#257CA3', '#819090']; // Blue spectrum colors
             var bgColor = colors[Math.floor(Math.random() * colors.length)];
             body.style.backgroundColor = bgColor;
-            localStorage.setItem('bgColor', bgColor); // Store the background color in localStorage
         }
-
-        // Check for stored background color and set it on page load
-        window.addEventListener('load', function() {
-            var storedBgColor = localStorage.getItem('bgColor');
-            if (storedBgColor) {
-                var body = document.querySelector('body');
-                body.style.backgroundColor = storedBgColor;
-            }
-        });
     </script>
 </body>
 </html>
