@@ -32,15 +32,6 @@ nav a:hover {
     background-color: #ddd;
     color: black;
 }
-.riddle-list {
-    margin-top: 20px;
-}
-.riddle {
-    margin-bottom: 20px;
-}
-.answer.hidden {
-    display: none;
-}
 .cat-container {
     font-size: 20px;
     line-height: 1.5;
@@ -49,12 +40,6 @@ nav a:hover {
     top: 20px;
     right: 20px;
 }
-/* Style for button */
-#startColorChange {
-    position: absolute;
-    left: 20px; /* Adjust left position */
-    top: 200px; /* Adjust top position */
-}
 .cat-drawing {
     text-align: center;
     margin-top: 40px;
@@ -62,4 +47,15 @@ nav a:hover {
 .cat-drawing pre {
     white-space: pre-wrap;
     margin-bottom: 15px;
+}
+.cat-gif {
+    text-align: center;
+    margin-top: 20px;
+}
+
+/* For mobile devices */
+@media only screen and (max-width: 600px) {
+    .cat-container {
+        display: none;
+    }
 }

@@ -83,11 +83,3 @@ function refreshPage() {
 
 // Generate cat riddles when page loads
 generateCatRiddles();
-
-// Function to change background color along the specified hex values
-function changeBackgroundColor() {
-    const body = document.querySelector('body');
-    const colors = ['#006BCE', '#257CA3', '#819090']; // Specified hex values
-    const bgColor = colors[Math.floor(Math.random() * colors.length)];
-    body.style.backgroundColor = bgColor;
-}
