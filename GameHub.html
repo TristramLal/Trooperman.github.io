@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Game Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Basic reset and body styling */
+        body {
+            margin: 0;
+            overflow-y: auto; /* Allow scrolling for content that exceeds viewport height */
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start; /* Align content to the top */
+            align-items: center;
+            min-height: 100vh;
+            background-color: #1a202c; /* Dark gray background */
+            font-family: 'Inter', sans-serif;
+            color: #ffffff;
+            padding: 20px; /* Add some padding around the content */
+            box-sizing: border-box; /* Include padding in element's total width and height */
+        }
+
+        /* Game hub container styling */
+        .game-hub-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #2d3748; /* Slightly lighter dark background for the container */
+            border-radius: 12px; /* Rounded corners for the container */
+            padding: 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5); /* Soft shadow */
+            max-width: 900px; /* Max width for desktop */
+            width: 100%; /* Fluid width */
+            box-sizing: border-box;
+            margin-bottom: 20px; /* Space below the hub */
+        }
+
+        h1 {
+            font-size: 2.5rem; /* Larger title */
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #ecc94b; /* Yellow accent for title */
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+
+        /* Game Hub Main Page Styling */
+        #gameHubMainPage {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Responsive grid */
+            gap: 25px;
+            width: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+            justify-content: center;
+        }
+
+        .game-card {
+            background-color: #3a475a;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+            text-align: center;
+            transition: transform 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-bottom: 15px;
+        }
+
+        .game-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .game-card img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-bottom: 2px solid #2d3748;
+        }
+
+        .game-card h2 {
+            font-size: 1.8rem;
+            color: #ecc94b;
+            margin: 15px 0 10px;
+            font-weight: 700;
+        }
+
+        .game-card p {
+            font-size: 0.95rem;
+            color: #cbd5e0;
+            margin-bottom: 15px;
+            padding: 0 15px;
+        }
+
+        .game-card .play-game-button {
+            padding: 10px 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #fff;
+            background-color: #48bb78;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+            outline: none;
+            text-decoration: none; /* For link buttons */
+            display: inline-block; /* For link buttons */
+        }
+
+        .game-card .play-game-button:hover {
+            background-color: #38a169;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="game-hub-container">
+        <h1>Welcome to the Game Hub!</h1>
+
+        <!-- Game Hub Main Page -->
+        <div id="gameHubMainPage" class="game-area active">
+            <div class="game-card">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Pong.png/800px-Pong.png" alt="Pong Game Thumbnail" onerror="this.onerror=null;this.src='https://placehold.co/400x150/48bb78/ffffff?text=Pong'">
+                <h2>Pong</h2>
+                <p>A classic arcade tennis simulation. Challenge the CPU or a friend!</p>
+                <a href="PongGame.html" target="_blank" class="play-game-button">Play Game</a>
+            </div>
+            <div class="game-card">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Yahtzee_dice.jpg/640px-Yahtzee_dice.jpg" alt="Yahtzee Game Thumbnail" onerror="this.onerror=null;this.src='https://placehold.co/400x150/5a67d8/ffffff?text=Yahtzee'">
+                <h2>Yahtzee</h2>
+                <p>Roll the dice and score big in this strategic dice game.</p>
+                <a href="YahtzeeGame.html" target="_blank" class="play-game-button">Play Game</a>
+            </div>
+            <div class="game-card">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Pinball_machine_playfield.jpg/800px-Pinball_machine_playfield.jpg" alt="Pinball Game Thumbnail" onerror="this.onerror=null;this.src='https://placehold.co/400x150/e53e3e/ffffff?text=Pinball'">
+                <h2>Pinball</h2>
+                <p>Launch the ball and hit bumpers for high scores!</p>
+                <a href="Pinball_V3-3.html" target="_blank" class="play-game-button">Play Game</a>
+            </div>
+            <!-- New Games Added Below -->
+            <div class="game-card">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Mancala_Board.jpg/800px-Mancala_Board.jpg" alt="Mancala Game Thumbnail" onerror="this.onerror=null;this.src='https://placehold.co/400x150/9a67d8/ffffff?text=Mancala'">
+                <h2>Mancala</h2>
+                <p>A classic African strategy board game. Capture the most stones!</p>
+                <a href="MancalaGame.html" target="_blank" class="play-game-button">Play Game</a>
+            </div>
+            <div class="game-card">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/Klondike_solitaire_set_up.jpg/800px-Klondike_solitaire_set_up.jpg" alt="Solitaire Game Thumbnail" onerror="this.onerror=null;this.src='https://placehold.co/400x150/457b9d/ffffff?text=Solitaire'">
+                <h2>Solitaire</h2>
+                <p>The timeless card game for one player. Arrange the cards in order!</p>
+                <a href="SolitaireGame.html" target="_blank" class="play-game-button">Play Game</a>
+            </div>
+            <div class="game-card">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Memory_Game_Cards.jpg/800px-Memory_Game_Cards.jpg" alt="Memory Game Thumbnail" onerror="this.onerror=null;this.src='https://placehold.co/400x150/f4a261/ffffff?text=Memory+Game'">
+                <h2>Memory Game</h2>
+                <p>Test your memory by matching pairs of cards. Find them all!</p>
+                <a href="MemoryGame.html" target="_blank" class="play-game-button">Play Game</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

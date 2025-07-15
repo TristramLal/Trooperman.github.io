@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Game</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* General body styling */
+        body {
+            margin: 0;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #1a202c; /* Dark gray background */
+            font-family: 'Inter', sans-serif;
+            color: #ffffff;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        /* Game container styling */
+        .memory-game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #2d3748; /* Slightly lighter dark background */
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+            max-width: 700px; /* Max width for desktop */
+            width: 100%; /* Fluid width */
+            box-sizing: border-box;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #ecc94b; /* Yellow accent for title */
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+
+        #memory-message {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: #cbd5e0;
+            text-align: center;
+        }
+
+        /* Game board grid */
+        .memory-game-board {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr); /* 4 columns */
+            grid-gap: 15px;
+            padding: 15px;
+            background-color: #4a5568; /* Board background */
+            border-radius: 10px;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 600px; /* Max width for the grid */
+            box-sizing: border-box;
+        }
+
+        /* When the board is locked, prevent pointer events */
+        .memory-game-board.locked {
+            pointer-events: none;
+            opacity: 0.8; /* Slightly dim to indicate locked state */
+        }
+
+        /* Card styling */
+        .card-container {
+            perspective: 1000px; /* For 3D flip effect */
+            width: 100px; /* Fixed card width */
+            height: 100px; /* Fixed card height */
+            cursor: pointer;
+        }
+
+        .memory-card {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.5s;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .memory-card.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .front-face, .back-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #ffffff;
+            user-select: none; /* Prevent text selection */
+        }
+
+        .back-face {
+            background-color: #63b3ed; /* Blue card back */
+            transform: rotateY(0deg);
+        }
+
+        .front-face {
+            background-color: #48bb78; /* Green card front */
+            transform: rotateY(180deg);
+        }
+
+        /* Matched cards */
+        .memory-card.matched .front-face,
+        .memory-card.matched .back-face {
+            opacity: 0.5; /* Fade out matched cards */
+            pointer-events: none; /* Disable clicks on matched cards */
+        }
+
+        /* Game controls */
+        .game-controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .game-button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #fff;
+            background-color: #4299e1; /* Blue button */
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+            outline: none;
+        }
+
+        .game-button:hover {
+            background-color: #3182ce;
+            transform: translateY(-2px);
+        }
+
+        .game-button:disabled {
+            background-color: #a0aec0;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        /* Modal for messages */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.7); /* Black w/ opacity */
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #2d3748;
+            margin: auto;
+            padding: 30px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 400px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            text-align: center;
+            position: relative;
+        }
+
+        .close-button {
+            color: #aaa;
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: #fff;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="memory-game-container">
+        <h1>Memory Game</h1>
+        <p id="memory-message">Find the matching pairs!</p>
+
+        <div class="memory-game-board" id="game-board">
+            <!-- Cards will be dynamically inserted here by JavaScript -->
+        </div>
+
+        <div class="game-controls">
+            <button id="resetButton" class="game-button">Reset Game</button>
+        </div>
+    </div>
+
+    <!-- Modal for game messages -->
+    <div id="gameModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <p id="modalMessage"></p>
+            <button id="modalOkButton" class="game-button">OK</button>
+        </div>
+    </div>
+
+    <script>
+        // Game state variables
+        const gameBoard = document.getElementById('game-board');
+        const messageDisplay = document.getElementById('memory-message');
+        const resetButton = document.getElementById('resetButton');
+
+        let cards = [];
+        let flippedCards = [];
+        let matchedPairs = 0;
+        let lockBoard = false; // Prevents flipping more than two cards at once
+
+        // Modal elements
+        const gameModal = document.getElementById('gameModal');
+        const modalMessage = document.getElementById('modalMessage');
+        const closeButton = document.querySelector('.close-button');
+        const modalOkButton = document.getElementById('modalOkButton');
+
+        // Card content (emojis for simplicity) - ensure an even number for pairs
+        const cardContent = ['🍎', '🍌', '�', '🍇', '🍋', '🥝', '🍓', '🍍'];
+
+        /**
+         * Shows the custom modal with a message.
+         * @param {string} message - The message to display in the modal.
+         */
+        function showModal(message) {
+            modalMessage.textContent = message;
+            gameModal.style.display = 'flex'; // Use flex to center
+        }
+
+        /**
+         * Hides the custom modal.
+         */
+        function hideModal() {
+            gameModal.style.display = 'none';
+        }
+
+        /**
+         * Updates the message displayed to the user.
+         * @param {string} msg - The message to display.
+         */
+        function updateMessage(msg) {
+            messageDisplay.textContent = msg;
+        }
+
+        /**
+         * Initializes the game board.
+         */
+        function initializeGame() {
+            cards = [];
+            flippedCards = [];
+            matchedPairs = 0;
+            lockBoard = false;
+            gameBoard.innerHTML = ''; // Clear existing cards
+            gameBoard.classList.remove('locked'); // Ensure board is unlocked on new game
+
+            // Create pairs of cards
+            let gameCards = [...cardContent, ...cardContent];
+            shuffleCards(gameCards);
+
+            // Create card elements and add to board
+            gameCards.forEach((content, index) => {
+                const cardContainer = document.createElement('div');
+                cardContainer.classList.add('card-container');
+                cardContainer.dataset.index = index; // Store original index for reference
+
+                const memoryCard = document.createElement('div');
+                memoryCard.classList.add('memory-card');
+                memoryCard.dataset.content = content; // Store the content for matching
+
+                const frontFace = document.createElement('div');
+                frontFace.classList.add('front-face');
+                frontFace.textContent = content;
+
+                const backFace = document.createElement('div');
+                backFace.classList.add('back-face');
+
+                memoryCard.appendChild(frontFace);
+                memoryCard.appendChild(backFace);
+                cardContainer.appendChild(memoryCard);
+                gameBoard.appendChild(cardContainer);
+
+                cardContainer.addEventListener('click', flipCard);
+                cards.push(memoryCard); // Store reference to the memory-card element
+            });
+
+            updateMessage("Find the matching pairs!");
+        }
+
+        /**
+         * Shuffles an array using the Fisher-Yates algorithm.
+         * @param {Array} array - The array to shuffle.
+         */
+        function shuffleCards(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]]; // Swap elements
+            }
+        }
+
+        /**
+         * Handles a card flip action.
+         */
+        function flipCard() {
+            if (lockBoard) return; // Prevent flipping if board is locked
+            if (this.querySelector('.memory-card').classList.contains('flipped')) return; // Prevent re-flipping already flipped cards
+
+            const clickedCard = this.querySelector('.memory-card');
+            clickedCard.classList.add('flipped');
+            flippedCards.push(clickedCard);
+
+            if (flippedCards.length === 2) {
+                lockBoard = true; // Lock board after two cards are flipped
+                gameBoard.classList.add('locked'); // Add visual lock
+                checkForMatch();
+            }
+        }
+
+        /**
+         * Checks if the two flipped cards are a match.
+         */
+        function checkForMatch() {
+            const [card1, card2] = flippedCards;
+            const isMatch = card1.dataset.content === card2.dataset.content;
+
+            if (isMatch) {
+                disableCards();
+            } else {
+                unflipCards();
+            }
+        }
+
+        /**
+         * Disables matched cards and increments matched pairs count.
+         */
+        function disableCards() {
+            flippedCards.forEach(card => {
+                card.classList.add('matched');
+                card.parentElement.removeEventListener('click', flipCard); // Remove listener from container
+            });
+            matchedPairs++;
+            updateMessage("It's a match!");
+            resetBoard(); // Reset flipped cards and unlock board
+
+            if (matchedPairs === cardContent.length) { // All pairs found
+                setTimeout(() => {
+                    showModal("Congratulations! You found all pairs!");
+                    updateMessage("Game Over! Click Reset to play again.");
+                }, 500);
+            }
+        }
+
+        /**
+         * Unflips cards that are not a match.
+         */
+        function unflipCards() {
+            setTimeout(() => {
+                flippedCards.forEach(card => {
+                    card.classList.remove('flipped');
+                });
+                updateMessage("No match. Try again!");
+                resetBoard(); // Reset flipped cards and unlock board
+            }, 1000); // Wait 1 second before unflipping
+        }
+
+        /**
+         * Resets the state of flipped cards and unlocks the board.
+         */
+        function resetBoard() {
+            [flippedCards, lockBoard] = [[], false];
+            gameBoard.classList.remove('locked'); // Remove visual lock
+        }
+
+        // Event Listeners
+        resetButton.addEventListener('click', initializeGame);
+        closeButton.addEventListener('click', hideModal);
+        modalOkButton.addEventListener('click', hideModal);
+        window.addEventListener('click', (event) => {
+            if (event.target === gameModal) {
+                hideModal();
+            }
+        });
+
+        // Initialize the game when the page loads
+        window.onload = initializeGame;
+    </script>
+</body>
+</html>
+�

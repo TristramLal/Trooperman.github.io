@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mancala Game</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* General body styling */
+        body {
+            margin: 0;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #1a202c; /* Dark gray background */
+            font-family: 'Inter', sans-serif;
+            color: #ffffff;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        /* Game container styling */
+        .mancala-game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #2d3748; /* Slightly lighter dark background */
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+            max-width: 800px; /* Max width for desktop */
+            width: 100%; /* Fluid width */
+            box-sizing: border-box;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #ecc94b; /* Yellow accent for title */
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+
+        #mancala-message {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: #cbd5e0;
+            text-align: center;
+        }
+
+        /* Mancala board layout */
+        .mancala-board {
+            display: grid;
+            grid-template-columns: 1fr repeat(6, 1fr) 1fr; /* Store, 6 pits, Store */
+            grid-template-rows: auto auto; /* Two rows for pits */
+            gap: 10px;
+            width: 100%;
+            max-width: 760px; /* Adjust based on desired pit size */
+            margin: 20px 0;
+            background-color: #4a5568; /* Board background */
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Store styling */
+        .store {
+            grid-row: 1 / span 2; /* Spans both rows */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #63b3ed; /* Blue for stores */
+            border-radius: 50px; /* Pill shape */
+            padding: 10px;
+            min-width: 70px; /* Increased minimum width for stores */
+            min-height: 130px; /* Increased minimum height for stores */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1a202c;
+            box-sizing: border-box; /* Ensure padding is included */
+        }
+
+        .store.player-1 {
+            grid-column: 8; /* Right side for Player 1's store */
+        }
+
+        .store.player-2 {
+            grid-column: 1; /* Left side for Player 2's store */
+        }
+
+        /* Pit styling */
+        .pit {
+            width: 90px; /* Increased fixed width for pits */
+            height: 90px; /* Increased fixed height for pits */
+            background-color: #a0aec0; /* Lighter gray for pits */
+            border-radius: 50%; /* Circular pits */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #1a202c;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2), 0 2px 5px rgba(0, 0, 0, 0.3);
+            box-sizing: border-box; /* Ensure padding is included */
+            overflow: hidden; /* Hide anything that overflows */
+        }
+
+        .pit:hover:not(.disabled) {
+            background-color: #cbd5e0; /* Lighter on hover */
+            transform: translateY(-2px);
+        }
+
+        .pit.disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        /* Player 1's pits (bottom row) */
+        .pit.player-1-pit {
+            grid-row: 2;
+        }
+
+        /* Player 2's pits (top row) */
+        .pit.player-2-pit {
+            grid-row: 1;
+        }
+
+        /* Active player highlight */
+        .current-player-highlight {
+            border: 3px solid #48bb78; /* Green border for current player */
+            box-shadow: 0 0 15px rgba(72, 187, 120, 0.8);
+        }
+
+        /* Stone count styling - ensures centering */
+        .pit .stone-count, .store .stone-count {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            line-height: 1; /* Adjust line height to prevent extra space */
+            z-index: 10; /* Ensure count is above any potential background */
+            color: #1a202c;
+            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.3);
+        }
+
+        /* Game controls and mode selection */
+        .game-controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap; /* Allow wrapping on smaller screens */
+            justify-content: center;
+        }
+
+        .game-button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #fff;
+            background-color: #4299e1; /* Blue button */
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+            outline: none;
+        }
+
+        .game-button:hover {
+            background-color: #3182ce;
+            transform: translateY(-2px);
+        }
+
+        .game-button:disabled {
+            background-color: #a0aec0;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        .game-mode-selection, .difficulty-selection {
+            background-color: #3a475a;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: flex-start;
+        }
+
+        .game-mode-selection label, .difficulty-selection label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            color: #cbd5e0;
+        }
+
+        .game-mode-selection input[type="radio"],
+        .difficulty-selection input[type="radio"] {
+            /* Basic styling for radio buttons */
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border: 2px solid #63b3ed;
+            border-radius: 50%;
+            outline: none;
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .game-mode-selection input[type="radio"]:checked,
+        .difficulty-selection input[type="radio"]:checked {
+            background-color: #63b3ed;
+            border-color: #63b3ed;
+        }
+
+        .game-mode-selection input[type="radio"]:checked::before,
+        .difficulty-selection input[type="radio"]:checked::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #1a202c; /* Inner dot color */
+            display: block;
+        }
+
+        /* Modal for messages */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.7); /* Black w/ opacity */
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #2d3748;
+            margin: auto;
+            padding: 30px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 400px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            position: relative;
+        }
+
+        .close-button {
+            color: #aaa;
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: #fff;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="mancala-game-container">
+        <h1>Mancala</h1>
+        <p id="mancala-message">Select game mode and click Start Game!</p>
+
+        <div class="game-mode-selection">
+            <label>
+                <input type="radio" name="gameMode" value="pvp" checked> Player vs Player
+            </label>
+            <label>
+                <input type="radio" name="gameMode" value="pve-easy"> Player vs AI (Easy)
+            </label>
+            <label>
+                <input type="radio" name="gameMode" value="pve-medium"> Player vs AI (Medium)
+            </label>
+            <label>
+                <input type="radio" name="gameMode" value="pve-hard"> Player vs AI (Hard)
+            </label>
+        </div>
+
+        <div class="game-controls">
+            <button id="startGameButton" class="game-button">Start Game</button>
+            <button id="resetButton" class="game-button" style="display: none;">Reset Game</button>
+        </div>
+
+        <div class="mancala-board" style="display: none;">
+            <!-- Player 2's Pits (top row, indices 12 to 7) -->
+            <div class="store player-2" id="store-p2"><span class="stone-count">0</span></div>
+            <div class="pit player-2-pit" id="pit-12"><span class="stone-count">4</span></div>
+            <div class="pit player-2-pit" id="pit-11"><span class="stone-count">4</span></div>
+            <div class="pit player-2-pit" id="pit-10"><span class="stone-count">4</span></div>
+            <div class="pit player-2-pit" id="pit-9"><span class="stone-count">4</span></div>
+            <div class="pit player-2-pit" id="pit-8"><span class="stone-count">4</span></div>
+            <div class="pit player-2-pit" id="pit-7"><span class="stone-count">4</span></div>
+            <!-- Player 1's Store (right side) -->
+            <div class="store player-1" id="store-p1"><span class="stone-count">0</span></div>
+
+            <!-- Player 1's Pits (bottom row, indices 0 to 5) -->
+            <div class="pit player-1-pit" id="pit-0"><span class="stone-count">4</span></div>
+            <div class="pit player-1-pit" id="pit-1"><span class="stone-count">4</span></div>
+            <div class="pit player-1-pit" id="pit-2"><span class="stone-count">4</span></div>
+            <div class="pit player-1-pit" id="pit-3"><span class="stone-count">4</span></div>
+            <div class="pit player-1-pit" id="pit-4"><span class="stone-count">4</span></div>
+            <div class="pit player-1-pit" id="pit-5"><span class="stone-count">4</span></div>
+        </div>
+    </div>
+
+    <!-- Modal for game messages -->
+    <div id="gameModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <p id="modalMessage"></p>
+            <button id="modalOkButton" class="game-button">OK</button>
+        </div>
+    </div>
+
+    <script>
+        // Game state variables
+        let board = new Array(14).fill(0); // 0-5: P1 pits, 6: P1 store, 7-12: P2 pits, 13: P2 store
+        const P1_STORE = 6;
+        const P2_STORE = 13;
+        let currentPlayer = 1; // 1 for Player 1, 2 for Player 2
+        let gameOver = false;
+        let gameMode = 'pvp'; // 'pvp', 'pve-easy', 'pve-medium', 'pve-hard'
+        const AI_DELAY = 1000; // Delay in milliseconds for AI moves
+
+        // DOM elements
+        const messageDisplay = document.getElementById('mancala-message');
+        const startGameButton = document.getElementById('startGameButton');
+        const resetButton = document.getElementById('resetButton');
+        const gameModeRadios = document.querySelectorAll('input[name="gameMode"]');
+        const mancalaBoardEl = document.querySelector('.mancala-board');
+
+        const pits = Array.from({ length: 13 }, (_, i) => document.getElementById(`pit-${i}`)); // pits 0-5 and 7-12
+        const storeP1 = document.getElementById('store-p1');
+        const storeP2 = document.getElementById('store-p2');
+
+        // Modal elements
+        const gameModal = document.getElementById('gameModal');
+        const modalMessage = document.getElementById('modalMessage');
+        const closeButton = document.querySelector('.close-button');
+        const modalOkButton = document.getElementById('modalOkButton');
+
+        /**
+         * Initializes or resets the game board.
+         * Sets 4 stones in each pit and 0 in each store.
+         */
+        function initializeGame() {
+            for (let i = 0; i < 6; i++) {
+                board[i] = 4; // Player 1's pits
+                board[i + 7] = 4; // Player 2's pits
+            }
+            board[P1_STORE] = 0; // Player 1's store
+            board[P2_STORE] = 0; // Player 2's store
+            currentPlayer = 1;
+            gameOver = false;
+            updateBoardUI();
+            updateMessage(`Player ${currentPlayer}'s Turn`);
+            highlightCurrentPlayer();
+            enablePitsForCurrentPlayer();
+
+            // Show board and hide start button, show reset button
+            mancalaBoardEl.style.display = 'grid';
+            startGameButton.style.display = 'none';
+            resetButton.style.display = 'inline-block';
+            document.querySelector('.game-mode-selection').style.display = 'none';
+
+            // If AI is Player 2 and it's Player 2's turn, make AI move
+            if (gameMode !== 'pvp' && currentPlayer === 2) {
+                setTimeout(makeAIMove, AI_DELAY);
+            }
+        }
+
+        /**
+         * Updates the visual representation of the board based on the game state.
+         */
+        function updateBoardUI() {
+            // Update Player 1's pits (0-5)
+            for (let i = 0; i < 6; i++) {
+                const pitElement = document.getElementById(`pit-${i}`);
+                if (pitElement) {
+                    pitElement.querySelector('.stone-count').textContent = board[i];
+                }
+            }
+
+            // Update Player 2's pits (7-12)
+            for (let i = 7; i < 13; i++) {
+                const pitElement = document.getElementById(`pit-${i}`);
+                if (pitElement) {
+                    pitElement.querySelector('.stone-count').textContent = board[i];
+                }
+            }
+
+            // Update stores
+            storeP1.querySelector('.stone-count').textContent = board[P1_STORE];
+            storeP2.querySelector('.stone-count').textContent = board[P2_STORE];
+        }
+
+        /**
+         * Displays a message to the user.
+         * @param {string} msg - The message to display.
+         */
+        function updateMessage(msg) {
+            messageDisplay.textContent = msg;
+        }
+
+        /**
+         * Highlights the current player's side of the board.
+         */
+        function highlightCurrentPlayer() {
+            // Remove existing highlights
+            document.querySelectorAll('.current-player-highlight').forEach(el => {
+                el.classList.remove('current-player-highlight');
+            });
+
+            // Add highlight to current player's pits and store
+            if (currentPlayer === 1) {
+                for (let i = 0; i < 6; i++) {
+                    document.getElementById(`pit-${i}`).classList.add('current-player-highlight');
+                }
+                storeP1.classList.add('current-player-highlight');
+            } else { // currentPlayer === 2
+                for (let i = 7; i < 13; i++) {
+                    document.getElementById(`pit-${i}`).classList.add('current-player-highlight');
+                }
+                storeP2.classList.add('current-player-highlight');
+            }
+        }
+
+        /**
+         * Enables pits for the current player and disables others.
+         */
+        function enablePitsForCurrentPlayer() {
+            for (let i = 0; i < 13; i++) { // Iterate through all pits (excluding stores)
+                const pitElement = document.getElementById(`pit-${i}`);
+                if (!pitElement) continue; // Skip if element not found (e.g., store indices)
+
+                let isPlayersPit = false;
+                if (currentPlayer === 1 && i >= 0 && i <= 5) {
+                    isPlayersPit = true;
+                } else if (currentPlayer === 2 && i >= 7 && i <= 12) {
+                    isPlayersPit = true;
+                }
+
+                if (isPlayersPit && board[i] > 0 && !gameOver && (currentPlayer === 1 || gameMode === 'pvp')) {
+                    pitElement.classList.remove('disabled');
+                    pitElement.style.pointerEvents = 'auto'; // Enable clicks
+                } else {
+                    pitElement.classList.add('disabled');
+                    pitElement.style.pointerEvents = 'none'; // Disable clicks
+                }
+            }
+        }
+
+        /**
+         * Handles a pit click event.
+         * @param {number} pitIndex - The index of the pit clicked (0-13).
+         */
+        function handlePitClick(pitIndex) {
+            if (gameOver) {
+                showModal('Game is over! Please reset to play again.');
+                return;
+            }
+
+            // Prevent user from clicking if it's AI's turn
+            if (gameMode !== 'pvp' && currentPlayer === 2) {
+                showModal("It's the AI's turn!");
+                return;
+            }
+
+            // Check if it's the current player's pit and has stones
+            let isValidMove = false;
+            if (currentPlayer === 1 && pitIndex >= 0 && pitIndex <= 5 && board[pitIndex] > 0) {
+                isValidMove = true;
+            } else if (currentPlayer === 2 && pitIndex >= 7 && pitIndex <= 12 && board[pitIndex] > 0) {
+                isValidMove = true;
+            }
+
+            if (!isValidMove) {
+                showModal("Invalid move! Please select one of your own pits with stones.");
+                return;
+            }
+
+            makeMove(pitIndex);
+        }
+
+        /**
+         * Executes a move on the board.
+         * @param {number} startPitIndex - The index of the pit from which stones are moved.
+         */
+        function makeMove(startPitIndex) {
+            let stonesToSow = board[startPitIndex];
+            board[startPitIndex] = 0; // Empty the starting pit
+            updateBoardUI(); // Update UI immediately after emptying pit
+
+            let currentIndex = startPitIndex;
+            let lastPitLandedIn = -1;
+            let goAgain = false;
+
+            while (stonesToSow > 0) {
+                currentIndex = (currentIndex + 1) % 14; // Move to the next pit, wrap around
+
+                // Skip opponent's store
+                if (currentPlayer === 1 && currentIndex === P2_STORE) {
+                    continue;
+                }
+                if (currentPlayer === 2 && currentIndex === P1_STORE) {
+                    continue;
+                }
+
+                board[currentIndex]++; // Drop a stone
+                stonesToSow--;
+                lastPitLandedIn = currentIndex;
+                updateBoardUI(); // Update UI after each stone drop for visual feedback
+            }
+
+            // Check for 'go again' (landing in own store)
+            if (currentPlayer === 1 && lastPitLandedIn === P1_STORE) {
+                goAgain = true;
+            } else if (currentPlayer === 2 && lastPitLandedIn === P2_STORE) {
+                goAgain = true;
+            }
+
+            // Check for capture (landing in empty own pit)
+            // Conditions: last stone lands in an empty pit on current player's side, AND opposite pit has stones
+            if (!goAgain) { // Only check for capture if not going again
+                let isCurrentPlayersPit = false;
+                let oppositePitIndex = -1;
+
+                if (currentPlayer === 1 && lastPitLandedIn >= 0 && lastPitLandedIn <= 5) {
+                    isCurrentPlayersPit = true;
+                    oppositePitIndex = 12 - lastPitLandedIn;
+                } else if (currentPlayer === 2 && lastPitLandedIn >= 7 && lastPitLandedIn <= 12) {
+                    isCurrentPlayersPit = true;
+                    oppositePitIndex = 12 - lastPitLandedIn;
+                }
+
+                if (isCurrentPlayersPit && board[lastPitLandedIn] === 1 && oppositePitIndex !== -1 && board[oppositePitIndex] > 0) {
+                    const capturedStones = board[lastPitLandedIn] + board[oppositePitIndex];
+                    board[lastPitLandedIn] = 0; // Empty current pit
+                    board[oppositePitIndex] = 0; // Empty opposite pit
+                    if (currentPlayer === 1) {
+                        board[P1_STORE] += capturedStones; // Add to current player's store
+                    } else {
+                        board[P2_STORE] += capturedStones;
+                    }
+                    updateBoardUI();
+                    updateMessage(`Player ${currentPlayer} captured ${capturedStones} stones!`);
+                }
+            }
+
+            // Check for game end
+            if (checkGameEnd()) {
+                endGame();
+            } else {
+                if (!goAgain) {
+                    switchPlayer();
+                }
+                updateMessage(`Player ${currentPlayer}'s Turn`);
+                highlightCurrentPlayer();
+                enablePitsForCurrentPlayer();
+
+                // If it's AI's turn after the move (or go again), trigger AI move
+                if (gameMode !== 'pvp' && currentPlayer === 2 && !gameOver) {
+                    setTimeout(makeAIMove, AI_DELAY);
+                }
+            }
+        }
+
+        /**
+         * Switches the current player.
+         */
+        function switchPlayer() {
+            currentPlayer = currentPlayer === 1 ? 2 : 1;
+        }
+
+        /**
+         * Checks if the game has ended (one player's pits are all empty).
+         * @returns {boolean} True if the game has ended, false otherwise.
+         */
+        function checkGameEnd() {
+            let player1PitsEmpty = true;
+            for (let i = 0; i < 6; i++) {
+                if (board[i] > 0) {
+                    player1PitsEmpty = false;
+                    break;
+                }
+            }
+
+            let player2PitsEmpty = true;
+            for (let i = 7; i < 13; i++) {
+                if (board[i] > 0) {
+                    player2PitsEmpty = false;
+                    break;
+                }
+            }
+
+            return player1PitsEmpty || player2PitsEmpty;
+        }
+
+        /**
+         * Ends the game, collects remaining stones, and determines the winner.
+         */
+        function endGame() {
+            gameOver = true;
+            // Collect remaining stones from pits into respective stores
+            for (let i = 0; i < 6; i++) {
+                board[P1_STORE] += board[i];
+                board[i] = 0;
+            }
+            for (let i = 7; i < 13; i++) {
+                board[P2_STORE] += board[i];
+                board[i] = 0;
+            }
+            updateBoardUI(); // Final UI update
+
+            const scoreP1 = board[P1_STORE];
+            const scoreP2 = board[P2_STORE];
+
+            let finalMessage = `Game Over! Player 1: ${scoreP1} stones, Player 2: ${scoreP2} stones. `;
+            if (scoreP1 > scoreP2) {
+                finalMessage += "Player 1 Wins!";
+            } else if (scoreP2 > scoreP1) {
+                finalMessage += "Player 2 Wins!";
+            } else {
+                finalMessage += "It's a Tie!";
+            }
+            showModal(finalMessage);
+            updateMessage("Game Over! Click Reset to play again.");
+            // Disable all pits
+            document.querySelectorAll('.pit').forEach(pit => {
+                pit.classList.add('disabled');
+                pit.style.pointerEvents = 'none';
+            });
+        }
+
+        /**
+         * Shows the custom modal with a message.
+         * @param {string} message - The message to display in the modal.
+         */
+        function showModal(message) {
+            modalMessage.textContent = message;
+            gameModal.style.display = 'flex'; // Use flex to center
+        }
+
+        /**
+         * Hides the custom modal.
+         */
+        function hideModal() {
+            gameModal.style.display = 'none';
+        }
+
+        // --- AI Logic ---
+
+        /**
+         * Makes a move for the AI player.
+         */
+        function makeAIMove() {
+            if (gameOver) return;
+            updateMessage("AI's Turn...");
+            enablePitsForCurrentPlayer(); // Disable user interaction during AI turn
+
+            setTimeout(() => {
+                const chosenPit = chooseAIMove(gameMode);
+                if (chosenPit !== -1) {
+                    makeMove(chosenPit);
+                } else {
+                    // This case should ideally not happen if game is not over and there are moves
+                    console.error("AI could not find a valid move.");
+                    // Fallback to switch player if no valid moves (should be handled by checkGameEnd)
+                    if (!checkGameEnd()) {
+                        switchPlayer();
+                        updateMessage(`Player ${currentPlayer}'s Turn`);
+                        highlightCurrentPlayer();
+                        enablePitsForCurrentPlayer();
+                    }
+                }
+            }, AI_DELAY);
+        }
+
+        /**
+         * Gets all valid pits for the current player that have stones.
+         * @returns {number[]} An array of valid pit indices.
+         */
+        function getValidAIMoves() {
+            const validMoves = [];
+            const startPit = (currentPlayer === 1) ? 0 : 7;
+            const endPit = (currentPlayer === 1) ? 5 : 12;
+
+            for (let i = startPit; i <= endPit; i++) {
+                if (board[i] > 0) {
+                    validMoves.push(i);
+                }
+            }
+            return validMoves;
+        }
+
+        /**
+         * Simulates a move on a temporary board state.
+         * @param {number[]} currentBoard - The current board state.
+         * @param {number} startPitIndex - The pit to move from.
+         * @param {number} player - The player making the move.
+         * @returns {{newBoard: number[], landedInStore: boolean, capturedStones: number}} Simulation result.
+         */
+        function simulateMove(currentBoard, startPitIndex, player) {
+            let tempBoard = [...currentBoard]; // Create a copy
+            let stonesToSow = tempBoard[startPitIndex];
+            tempBoard[startPitIndex] = 0;
+
+            let currentIndex = startPitIndex;
+            let landedInStore = false;
+            let capturedStones = 0;
+            let lastPitLandedIn = -1;
+
+            while (stonesToSow > 0) {
+                currentIndex = (currentIndex + 1) % 14;
+
+                // Skip opponent's store
+                if (player === 1 && currentIndex === P2_STORE) {
+                    continue;
+                }
+                if (player === 2 && currentIndex === P1_STORE) {
+                    continue;
+                }
+
+                tempBoard[currentIndex]++;
+                stonesToSow--;
+                lastPitLandedIn = currentIndex;
+            }
+
+            if (player === 1 && lastPitLandedIn === P1_STORE) {
+                landedInStore = true;
+            } else if (player === 2 && lastPitLandedIn === P2_STORE) {
+                landedInStore = true;
+            }
+
+            // Check for capture in simulation
+            if (!landedInStore) {
+                let isPlayersPit = false;
+                let oppositePitIndex = -1;
+
+                if (player === 1 && lastPitLandedIn >= 0 && lastPitLandedIn <= 5) {
+                    isPlayersPit = true;
+                    oppositePitIndex = 12 - lastPitLandedIn;
+                } else if (player === 2 && lastPitLandedIn >= 7 && lastPitLandedIn <= 12) {
+                    isCurrentPlayersPit = true;
+                    oppositePitIndex = 12 - lastPitLandedIn;
+                }
+
+                if (isPlayersPit && tempBoard[lastPitLandedIn] === 1 && oppositePitIndex !== -1 && tempBoard[oppositePitIndex] > 0) {
+                    capturedStones = tempBoard[lastPitLandedIn] + tempBoard[oppositePitIndex];
+                    tempBoard[lastPitLandedIn] = 0;
+                    tempBoard[oppositePitIndex] = 0;
+                    if (player === 1) {
+                        tempBoard[P1_STORE] += capturedStones;
+                    } else {
+                        tempBoard[P2_STORE] += capturedStones;
+                    }
+                }
+            }
+
+            return { newBoard: tempBoard, landedInStore: landedInStore, capturedStones: capturedStones };
+        }
+
+        /**
+         * AI chooses a move based on difficulty.
+         * @param {string} difficulty - 'pve-easy', 'pve-medium', 'pve-hard'.
+         * @returns {number} The chosen pit index.
+         */
+        function chooseAIMove(difficulty) {
+            const validMoves = getValidAIMoves();
+            if (validMoves.length === 0) {
+                return -1; // No valid moves
+            }
+
+            if (difficulty === 'pve-easy') {
+                return validMoves[Math.floor(Math.random() * validMoves.length)];
+            }
+
+            // For Medium and Hard, evaluate moves
+            let bestMoves = [];
+            let maxScoreIncrease = -1; // Track potential score increase from captures
+
+            for (const move of validMoves) {
+                const { newBoard, landedInStore, capturedStones } = simulateMove(board, move, currentPlayer);
+
+                if (landedInStore) {
+                    bestMoves.push({ pit: move, score: Infinity, type: 'goAgain' }); // Go again is highest priority
+                } else if (capturedStones > 0) {
+                    // Prioritize captures, especially larger ones
+                    if (capturedStones > maxScoreIncrease) {
+                        maxScoreIncrease = capturedStones;
+                        bestMoves = [{ pit: move, score: capturedStones, type: 'capture' }];
+                    } else if (capturedStones === maxScoreIncrease) {
+                        bestMoves.push({ pit: move, score: capturedStones, type: 'capture' });
+                    }
+                } else {
+                    bestMoves.push({ pit: move, score: 0, type: 'normal' }); // Normal move
+                }
+            }
+
+            // Filter for 'go again' moves first
+            const goAgainMoves = bestMoves.filter(m => m.type === 'goAgain');
+            if (goAgainMoves.length > 0) {
+                return goAgainMoves[Math.floor(Math.random() * goAgainMoves.length)].pit;
+            }
+
+            // If no 'go again' moves, filter for capture moves
+            const captureMoves = bestMoves.filter(m => m.type === 'capture' && m.score === maxScoreIncrease);
+            if (captureMoves.length > 0) {
+                // For 'hard', if there are multiple captures, prefer one that empties the pit
+                if (difficulty === 'pve-hard') {
+                    const emptyingCaptures = captureMoves.filter(m => board[m.pit] === 1); // Pit becomes empty after move
+                    if (emptyingCaptures.length > 0) {
+                        return emptyingCaptures[Math.floor(Math.random() * emptyingCaptures.length)].pit;
+                    }
+                }
+                return captureMoves[Math.floor(Math.random() * captureMoves.length)].pit;
+            }
+
+            // If no 'go again' or capture moves, pick a random normal move
+            const normalMoves = bestMoves.filter(m => m.type === 'normal');
+            if (normalMoves.length > 0) {
+                // For 'hard', if no special moves, try to spread stones evenly or move from pits with many stones
+                if (difficulty === 'pve-hard') {
+                    // Simple heuristic: pick a move that puts stones into opponent's pits (to avoid giving them captures)
+                    // Or simply pick the pit with the most stones to distribute widely
+                    let bestNormalMove = -1;
+                    let maxStonesInPit = -1;
+                    for (const move of normalMoves) {
+                        if (board[move.pit] > maxStonesInPit) {
+                            maxStonesInPit = board[move.pit];
+                            bestNormalMove = move.pit;
+                        }
+                    }
+                    if (bestNormalMove !== -1) return bestNormalMove;
+                }
+                return normalMoves[Math.floor(Math.random() * normalMoves.length)].pit;
+            }
+
+            // Fallback: should not be reached if validMoves is not empty
+            return validMoves[Math.floor(Math.random() * validMoves.length)];
+        }
+
+
+        // Event Listeners
+        startGameButton.addEventListener('click', initializeGame);
+        resetButton.addEventListener('click', () => {
+            // Reset UI to initial state
+            mancalaBoardEl.style.display = 'none';
+            startGameButton.style.display = 'inline-block';
+            resetButton.style.display = 'none';
+            document.querySelector('.game-mode-selection').style.display = 'flex';
+            updateMessage("Select game mode and click Start Game!");
+            // Re-initialize game state without dealing immediately
+            board = new Array(14).fill(0);
+            currentPlayer = 1;
+            gameOver = false;
+            updateBoardUI(); // Clear numbers
+            document.querySelectorAll('.current-player-highlight').forEach(el => {
+                el.classList.remove('current-player-highlight');
+            });
+            document.querySelectorAll('.pit').forEach(pit => {
+                pit.classList.remove('disabled');
+                pit.style.pointerEvents = 'auto';
+            });
+        });
+
+        gameModeRadios.forEach(radio => {
+            radio.addEventListener('change', (event) => {
+                gameMode = event.target.value;
+                updateMessage(`Game mode set to: ${event.target.labels[0].textContent}. Click Start Game!`);
+            });
+        });
+
+        // Add click listeners to pits
+        document.querySelectorAll('.pit').forEach((pitElement) => {
+            pitElement.addEventListener('click', (event) => {
+                const pitId = event.currentTarget.id; // e.g., 'pit-0'
+                const pitIndex = parseInt(pitId.split('-')[1]);
+                handlePitClick(pitIndex);
+            });
+        });
+
+        closeButton.addEventListener('click', hideModal);
+        modalOkButton.addEventListener('click', hideModal);
+        window.addEventListener('click', (event) => {
+            if (event.target === gameModal) {
+                hideModal();
+            }
+        });
+
+        // Initial state on load
+        window.onload = () => {
+            mancalaBoardEl.style.display = 'none'; // Hide board initially
+            resetButton.style.display = 'none'; // Hide reset button initially
+            updateMessage("Select game mode and click Start Game!");
+        };
+
+    </script>
+</body>
+</html>
